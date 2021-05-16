@@ -56,10 +56,7 @@ namespace StarterBot.Services.Controllers
 
             var response = await _botService.Client.ProcessNotificationAsync(ConvertHttpRequestToHttpRequestMessage(this.Request)).ConfigureAwait(false);
 
-            // Enforce the connection close to ensure that requests are evenly load balanced so
-            // calls do no stick to one instance of the worker role.
-            response.Headers.ConnectionClose = true;
-            var content = response.Content.ReadAsStringAsync();
+            var content = response.Content == null ? null : await response.Content?.ReadAsStringAsync();
             return Ok(content);
         }
 
@@ -85,10 +82,7 @@ namespace StarterBot.Services.Controllers
             // Pass the incoming notification to the sdk. The sdk takes care of what to do with it.
             var response = await _botService.Client.ProcessNotificationAsync(ConvertHttpRequestToHttpRequestMessage(this.Request)).ConfigureAwait(false);
 
-            // Enforce the connection close to ensure that requests are evenly load balanced so
-            // calls do no stick to one instance of the worker role.
-            response.Headers.ConnectionClose = true;
-            var content = response.Content.ReadAsStringAsync();
+            var content = response.Content == null ? null : await response.Content?.ReadAsStringAsync();
             return Ok(content);
         }
 
