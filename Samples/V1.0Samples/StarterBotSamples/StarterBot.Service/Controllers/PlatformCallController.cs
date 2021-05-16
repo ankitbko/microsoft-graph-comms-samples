@@ -18,9 +18,6 @@ using System.Threading.Tasks;
 
 namespace StarterBot.Services.Controllers
 {
-    using ErrorConstants = Microsoft.Graph.Communications.Core.Exceptions.ErrorConstants;
-
-
     /// <summary>
     /// Entry point for handling call-related web hook requests from Skype Platform.
     /// </summary>
@@ -52,7 +49,7 @@ namespace StarterBot.Services.Controllers
         /// <returns>The <see cref="HttpResponseMessage" />.</returns>
         [HttpPost]
         [Route(HttpRouteConstants.OnIncomingRequestRoute)]
-        public async Task<HttpResponseMessage> OnIncomingRequestAsync()
+        public async Task<IActionResult> OnIncomingRequestAsync()
         {
             var log = $"Received HTTP {this.Request.Method}, {this.Request.Path.Value}";
             _logger.Info(log);
@@ -62,7 +59,8 @@ namespace StarterBot.Services.Controllers
             // Enforce the connection close to ensure that requests are evenly load balanced so
             // calls do no stick to one instance of the worker role.
             response.Headers.ConnectionClose = true;
-            return response;
+            var content = response.Content.ReadAsStringAsync();
+            return Ok(content);
         }
 
         /// <summary>
@@ -71,7 +69,7 @@ namespace StarterBot.Services.Controllers
         /// <returns>The <see cref="HttpResponseMessage" />.</returns>
         [HttpPost]
         [Route(HttpRouteConstants.OnNotificationRequestRoute)]
-        public async Task<HttpResponseMessage> OnNotificationRequestAsync()
+        public async Task<IActionResult> OnNotificationRequestAsync()
         {
             var log = $"Received HTTP {this.Request.Method}, {this.Request.Path}";
             _logger.Info(log);
@@ -90,7 +88,8 @@ namespace StarterBot.Services.Controllers
             // Enforce the connection close to ensure that requests are evenly load balanced so
             // calls do no stick to one instance of the worker role.
             response.Headers.ConnectionClose = true;
-            return response;
+            var content = response.Content.ReadAsStringAsync();
+            return Ok(content);
         }
 
         private HttpRequestMessage ConvertHttpRequestToHttpRequestMessage(HttpRequest request)

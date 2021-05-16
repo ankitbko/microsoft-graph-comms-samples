@@ -59,13 +59,13 @@ namespace StarterBot.Services.Controllers
         /// <returns>The <see cref="Task" />.</returns>
         [HttpGet]
         [Route(HttpRouteConstants.Calls + "/")]
-        public HttpResponseMessage OnGetCalls()
+        public IActionResult OnGetCalls()
         {
             _logger.Info("Getting calls");
 
             if (_botService.CallHandlers.IsEmpty)
             {
-                return new HttpResponseMessage(HttpStatusCode.NoContent);
+                return StatusCode(203);
             }
 
             var calls = new List<Dictionary<string, string>>();
@@ -83,12 +83,7 @@ namespace StarterBot.Services.Controllers
                 };
                 calls.Add(values);
             }
-
-            var serializer = new CommsSerializer(pretty: true);
-            var json = serializer.SerializeObject(calls);
-            var response = new HttpResponseMessage(HttpStatusCode.OK);
-            response.Content = new StringContent(json, Encoding.UTF8, "application/json");
-            return response;
+            return Ok(calls);
         }
 
         /// <summary>
@@ -98,21 +93,19 @@ namespace StarterBot.Services.Controllers
         /// <returns>The <see cref="HttpResponseMessage" />.</returns>
         [HttpDelete]
         [Route(HttpRouteConstants.CallRoute)]
-        public async Task<HttpResponseMessage> OnEndCallAsync(string callLegId)
+        public async Task<IActionResult> OnEndCallAsync(string callLegId)
         {
             var message = $"Ending call {callLegId}";
             _logger.Info(message);
-            
+
             try
             {
                 await _botService.EndCallByCallLegIdAsync(callLegId).ConfigureAwait(false);
-                return new HttpResponseMessage(HttpStatusCode.OK);
+                return Ok();
             }
             catch (Exception e)
             {
-                var response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
-                response.Content = new StringContent(e.ToString());
-                return response;
+                return StatusCode(500, e.ToString());
             }
         }
 
